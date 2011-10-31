@@ -1,0 +1,5 @@
+project/boot
+*~
+*/project/target
+build
+target
