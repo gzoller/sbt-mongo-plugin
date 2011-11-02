@@ -11,7 +11,7 @@ object SbtMongoPlugin extends Plugin
 	val mongoFixtureDirectory = SettingKey[File]("mongo-fixture-directory","Directory where mongo fixtures will be found")
 	val mongoMigrationDirectory = SettingKey[File]("mongo-migration-directory","Directory where mongo migration scripts will be found")
 
-	lazy val mongoSettings = Seq(
+	lazy val mongoSettings:Seq[Project.Setting[_]] = Seq(
 		mongoFixtureDirectory <<= (unmanagedResourceDirectories in Test).apply({ (f) => new java.io.File(f.head, "/fixtures") }),
 		mongoMigrationDirectory <<= mongoFixtureDirectory,
 		mongoTask <<= (mongoFixtureDirectory, mongoMigrationDirectory) map { 
