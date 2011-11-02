@@ -1,1 +1,73 @@
-This plugin is a simplified version of one found here: https://github.com/mcfunley/sbt-mongodb-plugin.That one was developed for a pre-0.10.1 version of SBT and I needed something more current.Unlike mcfunley's version, this one does not start/stop mongo but rather assumes you have an instancerunning already someplace.USE: 1) Include the plugin in <yourproj>/project/plugins.sbt:	addSbtPlugin("co.nubilus" % "sbt-mongo-plugin" % "0.1")	2a) If you're using a single project build then in your build.sbt:	seq(mongoSettings: _*)		and in your build.scala:		lazy val myProj = Project(		id = "mybigproj",		base = file("."),		settings = mySettings ++ Seq(			// wires mongo-task to test			test in Test <<= (mongoTask, (test in Test).task) flatMap {(mongoTaskResult, test) => test} ,			// other settings		)	)	2b) If you're using a multi-project build then in your build.scala:	lazy val myProj = Project(		id = "mybigproj",		base = file("."),		settings = mySettings,		aggregate = Seq(mysubproj1, mysubproj2)	)		lazy val mysubProj1 = Project(		id = "mysubproj1",		base = file("subproj1"),		settings = mySettings ++ mongoSettings ++ Seq(			// wires mongo-task to test			test in Test <<= (mongoTask, (test in Test).task) flatMap {(mongoTaskResult, test) => test} ,			// other settings		)	)		lazy val mysubProj2 = Project(		id = "mysubproj2",		base = file("subproj2"),		settings = mySettings ++ mongoSettings ++ Seq(			// wires mongo-task to test			test in Test <<= (mongoTask, (test in Test).task) flatMap {(mongoTaskResult, test) => test} ,			// other settings		)	)3) Create fixture directory and populateFixtures go in /src/test/resources/fixtures by default.  File naming convention determines database andcollection used to load data.<db_name>.<collection_name>.jsonJavascript migration scripts can also be placed in this directory.  They will run immediately after the data is loaded, and have the following file naming convention:<db_name>.migration.jsEnjoy!
+This plugin provides an ability to bulk-load json data into MongoDB and run migration scripts
+as a task, for example as part of the test task.  This is a simplified version of one found 
+here: https://github.com/mcfunley/sbt-mongodb-plugin.  That one was developed for a pre-0.10.1 
+version of SBT and I needed something more current.  The examples below assume you want to run
+this as part of a test task and shows config to add the mongoTask task to the test task.
+
+Unlike mcfunley's version, this one does not start/stop mongo but rather assumes you have an instance
+running already someplace.
+
+USE: 
+
+1) Include the plugin in <yourproj>/project/plugins.sbt:
+
+	addSbtPlugin("co.nubilus" % "sbt-mongo-plugin" % "0.1")
+	
+2a) If you're using a single project build then in your build.sbt:
+
+	seq(mongoSettings: _*)
+	
+	and in your build.scala:
+	
+	lazy val myProj = Project(
+		id = "mybigproj",
+		base = file("."),
+		settings = mySettings ++ Seq(
+			// wires mongo-task to test
+			test in Test <<= (mongoTask, (test in Test).task) flatMap {(mongoTaskResult, test) => test} ,
+			// other settings
+		)
+	)
+	
+2b) If you're using a multi-project build then in your build.scala:
+
+	lazy val myProj = Project(
+		id = "mybigproj",
+		base = file("."),
+		settings = mySettings,
+		aggregate = Seq(mysubproj1, mysubproj2)
+	)
+	
+	lazy val mysubProj1 = Project(
+		id = "mysubproj1",
+		base = file("subproj1"),
+		settings = mySettings ++ mongoSettings ++ Seq(
+			// wires mongo-task to test
+			test in Test <<= (mongoTask, (test in Test).task) flatMap {(mongoTaskResult, test) => test} ,
+			// other settings
+		)
+	)
+	
+	lazy val mysubProj2 = Project(
+		id = "mysubproj2",
+		base = file("subproj2"),
+		settings = mySettings ++ mongoSettings ++ Seq(
+			// wires mongo-task to test
+			test in Test <<= (mongoTask, (test in Test).task) flatMap {(mongoTaskResult, test) => test} ,
+			// other settings
+		)
+	)
+
+3) Create fixture directory and populate
+
+Fixtures go in /src/test/resources/fixtures by default.  File naming convention determines database and
+collection used to load data.
+
+<db_name>.<collection_name>.json
+
+Javascript migration scripts can also be placed in this directory.  They will run immediately after the 
+data is loaded, and have the following file naming convention:
+
+<db_name>.migration.js
+
+Enjoy!
