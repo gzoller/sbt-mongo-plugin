@@ -1,11 +1,13 @@
-This plugin provides an ability to bulk-load json data into MongoDB and run migration scripts
-as a task, for example as part of the test task.  This is a simplified version of one found 
-here: https://github.com/mcfunley/sbt-mongodb-plugin.  That one was developed for a pre-0.10.1 
-version of SBT and I needed something more current.  The examples below assume you want to run
-this as part of a test task and shows config to add the mongoTask task to the test task.
+This plugin provides an ability to bulk-load json data into MongoDB and 
+run migration scripts as a task, for example as part of the test task.  
+This is a simplified version of one found here: 
+	https://github.com/mcfunley/sbt-mongodb-plugin.  
+That one was developed for a pre-0.10.1 version of SBT and I needed something 
+more current.  The examples below assume you want to run this as part of a 
+test task and shows config to add the mongoTask task to the test task.
 
-Unlike mcfunley's version, this one does not start/stop mongo but rather assumes you have an instance
-running already someplace.
+Unlike mcfunley's version, this one does not start/stop mongo but rather 
+assumes you have an instance running already someplace.
 
 USE: 
 
@@ -60,13 +62,14 @@ USE:
 
 3) Create fixture directory and populate
 
-Fixtures go in /src/test/resources/fixtures by default.  File naming convention determines database and
-collection used to load data.
+Fixtures go in /src/test/resources/fixtures by default.  File naming convention 
+determines database and collection used to load data.
 
 <db_name>.<collection_name>.json
 
-Javascript migration scripts can also be placed in this directory.  They will run immediately after the 
-data is loaded, and have the following file naming convention:
+Javascript migration scripts can also be placed in this directory.  They will 
+run immediately after the  data is loaded, and have the following file naming 
+convention:
 
 <db_name>.migration.js
 
