@@ -3,21 +3,18 @@ package co.nubilus
 import java.io.File
 import sbt._
 import Keys._
-import Process._
 
 object SbtMongoPlugin extends Plugin
 {
-	val mongoTask = TaskKey[Unit]("mongo-load","Load fixture data into mongo")
-	val mongoFixtureDirectory = SettingKey[File]("mongo-fixture-directory","Directory where mongo fixtures will be found")
-	val mongoMigrationDirectory = SettingKey[File]("mongo-migration-directory","Directory where mongo migration scripts will be found")
+	val mongoTask 				= TaskKey[Unit]   ("mongo-load", "Load fixture data into mongo")
+	
+	def mongo = 
+		(unmanagedResourceDirectories in mongoTask) map {
+			(baseMongoDir) => {
+				val mongoDir = new java.io.File(baseMongoDir.head,"/mongo")
 
-	val mongoSettings  = Seq(
-		mongoFixtureDirectory <<= (unmanagedResourceDirectories in Test).apply({ (f) => new java.io.File(f.head, "/fixtures") }),
-		mongoMigrationDirectory <<= mongoFixtureDirectory,
-		mongoTask <<= (mongoFixtureDirectory, mongoMigrationDirectory) map { 
-			(fixDir, migDir) => {
 				// Initial Data Load
-				lazy val mongoFixturePaths = fixDir ** "*.json" // find all json files in fixtures directory
+				lazy val mongoFixturePaths = mongoDir ** "*.json" // find all json files in fixtures directory
 				mongoFixturePaths.getPaths.foreach { p =>
 					val (dbname, cn) = mongoCollectionName((new File(p)).getName)  // parse out db and collection names
 					val path = { if( p.contains(" ") ) '"'+p+'"' else p } // hack for Windows...may have space in path, which tanks mongoimport unless you quote the path
@@ -25,7 +22,7 @@ object SbtMongoPlugin extends Plugin
 				}
 				
 				// Migrations
-				lazy val mongoMigrationPaths = migDir ** "*.migration.js"
+				lazy val mongoMigrationPaths = mongoDir ** "*.migration.js"
 				mongoMigrationPaths.getPaths.foreach { p =>
 					val dbname = mongoMigrationName((new File(p)).getName)
 					val path = { if( p.contains(" ") ) '"'+p+'"' else p } // hack for Windows...may have space in path, which tanks mongoimport unless you quote the path
@@ -33,7 +30,14 @@ object SbtMongoPlugin extends Plugin
 				}
 			}
 		}
-	)
+	def mongoSettingsIn(conf:Configuration) = 
+		inConfig(conf)(Seq(
+			unmanagedResourceDirectories in mongoTask <<= (unmanagedResourceDirectories in conf),
+			mongoTask <<= mongo
+		))
+	// This bit of magic makes my setting config-relative.  So in this instance unmanageResourceDirectories is
+	// set based on config.
+	def mongoSettings = mongoSettingsIn(Compile) ++	mongoSettingsIn(Test)
 	
 	private val FixtureFile = """([^.]*)\.([^.]*)\.json""".r
 	def mongoCollectionName(basename : String) : (String, String) = basename match {
