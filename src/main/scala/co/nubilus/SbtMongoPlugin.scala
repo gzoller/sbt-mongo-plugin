@@ -18,7 +18,8 @@ object SbtMongoPlugin extends Plugin
 				mongoFixturePaths.getPaths.foreach { p =>
 					val (dbname, cn) = mongoCollectionName((new File(p)).getName)  // parse out db and collection names
 					val path = { if( p.contains(" ") ) '"'+p+'"' else p } // hack for Windows...may have space in path, which tanks mongoimport unless you quote the path
-					Process("mongoimport -d %s -c %s --file %s --drop".format(dbname,cn,path), None, ("path",System.getenv.get("Path")))!
+					"mongoimport -d %s -c %s --file %s --drop".format(dbname,cn,path)!
+//					Process("mongoimport -d %s -c %s --file %s --drop".format(dbname,cn,path), None, ("path",System.getenv.get("Path")))!
 				}
 				
 				// Migrations
@@ -26,7 +27,8 @@ object SbtMongoPlugin extends Plugin
 				mongoMigrationPaths.getPaths.foreach { p =>
 					val dbname = mongoMigrationName((new File(p)).getName)
 					val path = { if( p.contains(" ") ) '"'+p+'"' else p } // hack for Windows...may have space in path, which tanks mongoimport unless you quote the path
-					Process("mongo %s %s".format(dbname,path), None, ("path",System.getenv.get("Path")))!
+					"mongo %s %s".format(dbname,path)!
+//					Process("mongo %s %s".format(dbname,path), None, ("path",System.getenv.get("Path")))!
 				}
 			}
 		}
